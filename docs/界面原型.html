@@ -1,0 +1,769 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>知识库管理工具 · 界面原型</title>
+<style>
+  :root{
+    --bg:#f3f5f9;
+    --panel:#ffffff;
+    --line:#e4e8f0;
+    --line-strong:#d5dbe7;
+    --text:#1c2333;
+    --text-2:#5b6474;
+    --text-3:#8b93a5;
+    --blue:#2563eb;
+    --blue-2:#3b82f6;
+    --blue-soft:#eef4ff;
+    --green:#0e9f6e;
+    --green-soft:#e8f7f1;
+    --amber:#b7791f;
+    --amber-soft:#fdf3e3;
+    --red:#d64545;
+    --red-soft:#fdecec;
+    --radius:10px;
+    --shadow:0 1px 2px rgba(18,28,45,.05),0 1px 3px rgba(18,28,45,.04);
+    --shadow-hover:0 6px 16px rgba(18,28,45,.10);
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html,body{height:100%}
+  body{
+    font-family:"Microsoft YaHei","PingFang SC","Segoe UI",sans-serif;
+    background:var(--bg);color:var(--text);
+    font-size:13px;-webkit-font-smoothing:antialiased;
+    overflow:hidden;
+  }
+  svg.icon{width:17px;height:17px;stroke:currentColor;fill:none;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round;flex:none}
+
+  /* ========== 布局骨架 ========== */
+  .app{display:flex;height:100vh}
+  .sidebar{
+    width:216px;flex:none;background:var(--panel);
+    border-right:1px solid var(--line);
+    display:flex;flex-direction:column;
+  }
+  .brand{
+    height:56px;display:flex;align-items:center;gap:10px;
+    padding:0 18px;border-bottom:1px solid var(--line);
+  }
+  .brand-mark{
+    width:28px;height:28px;border-radius:7px;flex:none;
+    background:linear-gradient(135deg,#2f6bff,#4f8dff);
+    display:flex;align-items:center;justify-content:center;
+    box-shadow:0 2px 6px rgba(47,107,255,.35);
+  }
+  .brand-mark svg{width:15px;height:15px;stroke:#fff;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+  .brand-name{font-size:14px;font-weight:600;letter-spacing:.5px}
+  .brand-sub{font-size:10px;color:var(--text-3);letter-spacing:1px;margin-top:1px}
+
+  .nav{padding:12px 10px;flex:1;overflow-y:auto}
+  .nav-label{font-size:11px;color:var(--text-3);letter-spacing:1px;padding:10px 10px 6px}
+  .nav-item{
+    display:flex;align-items:center;gap:10px;
+    padding:8px 10px;border-radius:8px;cursor:pointer;
+    color:var(--text-2);font-size:13px;margin-bottom:2px;
+    border:1px solid transparent;
+    transition:all .15s ease;
+  }
+  .nav-item:hover{background:#f4f7fd;color:var(--text)}
+  .nav-item.active{
+    background:var(--blue-soft);color:var(--blue);
+    border-color:#d8e5ff;font-weight:600;
+  }
+  .nav-item .dot{margin-left:auto;font-size:10px;background:#e8edf5;color:var(--text-2);
+    border-radius:20px;padding:1px 7px;font-weight:500}
+  .nav-item.active .dot{background:#d8e5ff;color:var(--blue)}
+
+  .sidebar-foot{border-top:1px solid var(--line);padding:12px 14px;font-size:11px;color:var(--text-3);line-height:1.7}
+  .sidebar-foot .ok{color:var(--green)}
+
+  .main{flex:1;display:flex;flex-direction:column;min-width:0}
+  .topbar{
+    height:56px;flex:none;background:var(--panel);
+    border-bottom:1px solid var(--line);
+    display:flex;align-items:center;gap:16px;padding:0 24px;
+  }
+  .page-title{font-size:15px;font-weight:600}
+  .page-desc{font-size:12px;color:var(--text-3)}
+  .topbar-search{
+    margin-left:auto;display:flex;align-items:center;gap:8px;
+    background:#f4f6fa;border:1px solid var(--line);
+    border-radius:8px;padding:6px 12px;width:280px;color:var(--text-3);
+  }
+  .topbar-search input{border:none;background:none;outline:none;font-size:12px;width:100%;color:var(--text)}
+  .status-chip{
+    display:flex;align-items:center;gap:7px;font-size:12px;color:var(--text-2);
+    border:1px solid var(--line);border-radius:20px;padding:5px 12px;background:#fbfbfd;
+  }
+  .pulse{width:7px;height:7px;border-radius:50%;background:var(--green);box-shadow:0 0 0 3px rgba(14,159,110,.15)}
+
+  .content{flex:1;overflow-y:auto;padding:22px 24px}
+  .view{display:none}
+  .view.active{display:block;animation:fade .18s ease}
+  @keyframes fade{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+
+  /* ========== 通用组件 ========== */
+  .card{
+    background:var(--panel);border:1px solid var(--line);
+    border-radius:var(--radius);box-shadow:var(--shadow);
+  }
+  .card-head{
+    padding:13px 16px;border-bottom:1px solid var(--line);
+    display:flex;align-items:center;gap:8px;
+  }
+  .card-head h3{font-size:13px;font-weight:600}
+  .card-head .more{margin-left:auto;font-size:12px;color:var(--text-3);cursor:pointer}
+  .card-head .more:hover{color:var(--blue)}
+  .card-body{padding:16px}
+
+  .btn{
+    display:inline-flex;align-items:center;gap:6px;
+    border:1px solid var(--line-strong);background:var(--panel);
+    color:var(--text-2);font-size:12px;border-radius:8px;
+    padding:7px 14px;cursor:pointer;transition:all .15s ease;
+  }
+  .btn:hover{transform:translateY(-1px);box-shadow:var(--shadow-hover);color:var(--text)}
+  .btn-primary{
+    background:linear-gradient(135deg,#2f6bff,#4f8dff);
+    border:none;color:#fff;font-weight:600;
+    box-shadow:0 2px 8px rgba(47,107,255,.30);
+  }
+  .btn-primary:hover{box-shadow:0 6px 14px rgba(47,107,255,.38);color:#fff}
+  .btn-sm{padding:4px 10px;font-size:11px;border-radius:6px}
+
+  .badge{
+    display:inline-flex;align-items:center;gap:4px;
+    font-size:11px;border-radius:5px;padding:2px 8px;font-weight:500;white-space:nowrap;
+  }
+  .b-blue{background:var(--blue-soft);color:var(--blue)}
+  .b-green{background:var(--green-soft);color:var(--green)}
+  .b-amber{background:var(--amber-soft);color:var(--amber)}
+  .b-red{background:var(--red-soft);color:var(--red)}
+  .b-gray{background:#eef1f6;color:var(--text-2)}
+
+  .grid{display:grid;gap:16px}
+  .muted{color:var(--text-3)}
+  .strong{font-weight:600}
+
+  table.tbl{width:100%;border-collapse:collapse;font-size:12px}
+  table.tbl th{
+    text-align:left;color:var(--text-3);font-weight:500;font-size:11px;
+    padding:8px 12px;border-bottom:1px solid var(--line);letter-spacing:.5px;
+  }
+  table.tbl td{padding:10px 12px;border-bottom:1px solid #f0f2f7;vertical-align:middle}
+  table.tbl tr:last-child td{border-bottom:none}
+  table.tbl tr:hover td{background:#f8fafd}
+
+  .progress{height:6px;background:#eef1f6;border-radius:4px;overflow:hidden}
+  .progress>i{display:block;height:100%;border-radius:4px;background:linear-gradient(90deg,#2f6bff,#6aa5ff)}
+
+  /* ========== 概览 ========== */
+  .stat-row{grid-template-columns:repeat(4,1fr)}
+  .stat{padding:16px 18px;display:flex;flex-direction:column;gap:6px;transition:all .15s ease}
+  .stat:hover{transform:translateY(-2px);box-shadow:var(--shadow-hover)}
+  .stat .k{font-size:12px;color:var(--text-3);display:flex;align-items:center;gap:7px}
+  .stat .v{font-size:26px;font-weight:700;letter-spacing:-.5px}
+  .stat .t{font-size:11px;color:var(--text-3)}
+  .stat .t .up{color:var(--green)}
+  .two-col{grid-template-columns:1.6fr 1fr;margin-top:16px}
+
+  .doc-item{display:flex;align-items:center;gap:12px;padding:11px 0;border-bottom:1px solid #f0f2f7}
+  .doc-item:last-child{border:none}
+  .doc-icon{
+    width:34px;height:34px;border-radius:8px;flex:none;
+    display:flex;align-items:center;justify-content:center;
+  }
+  .doc-meta{flex:1;min-width:0}
+  .doc-name{font-weight:600;font-size:12.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .doc-sub{font-size:11px;color:var(--text-3);margin-top:2px}
+
+  .task-item{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid #f0f2f7;font-size:12px}
+  .task-item:last-child{border:none}
+  .task-item .when{margin-left:auto;color:var(--text-3);font-size:11px;white-space:nowrap}
+
+  /* ========== 导入 ========== */
+  .dropzone{
+    border:1.5px dashed var(--line-strong);border-radius:var(--radius);
+    background:#fafbfe;padding:34px;text-align:center;color:var(--text-2);
+    transition:all .15s ease;cursor:pointer;
+  }
+  .dropzone:hover{border-color:var(--blue-2);background:var(--blue-soft)}
+  .dropzone .dz-icon{
+    width:46px;height:46px;margin:0 auto 12px;border-radius:12px;
+    background:var(--blue-soft);display:flex;align-items:center;justify-content:center;color:var(--blue);
+  }
+  .dz-icon svg.icon{width:22px;height:22px}
+  .dropzone p{font-size:13px;font-weight:600;color:var(--text)}
+  .dropzone span{font-size:11px;color:var(--text-3);display:block;margin-top:5px}
+
+  .steps{display:flex;align-items:center;margin:18px 0;gap:0}
+  .step{flex:1;text-align:center;position:relative}
+  .step::before{
+    content:"";position:absolute;top:11px;left:-50%;width:100%;height:2px;background:#e3e8f1;
+  }
+  .step:first-child::before{display:none}
+  .step.done::before,.step.doing::before{background:var(--blue-2)}
+  .step .ball{
+    width:22px;height:22px;border-radius:50%;margin:0 auto 6px;position:relative;z-index:1;
+    background:#e9edf4;border:2px solid #dbe1ec;
+    display:flex;align-items:center;justify-content:center;
+    font-size:11px;color:var(--text-3);
+  }
+  .step.done .ball{background:var(--blue);border-color:var(--blue);color:#fff}
+  .step.doing .ball{background:#fff;border-color:var(--blue);color:var(--blue);box-shadow:0 0 0 4px rgba(47,107,255,.15)}
+  .step .lbl{font-size:11px;color:var(--text-3)}
+  .step.done .lbl,.step.doing .lbl{color:var(--text);font-weight:600}
+
+  /* ========== 浏览（三栏） ========== */
+  .browse{grid-template-columns:220px 300px 1fr;height:calc(100vh - 56px - 44px);gap:16px}
+  .browse .card{display:flex;flex-direction:column;overflow:hidden}
+  .browse .card-body{flex:1;overflow-y:auto;padding:10px}
+  .tree-node{
+    display:flex;align-items:center;gap:7px;padding:7px 9px;border-radius:7px;
+    cursor:pointer;font-size:12.5px;color:var(--text-2);
+  }
+  .tree-node:hover{background:#f4f7fd}
+  .tree-node.sel{background:var(--blue-soft);color:var(--blue);font-weight:600}
+  .tree-node .cnt{margin-left:auto;font-size:10.5px;color:var(--text-3)}
+  .tree-child{padding-left:22px}
+
+  .note-item{padding:11px 12px;border-radius:8px;cursor:pointer;border:1px solid transparent;margin-bottom:4px}
+  .note-item:hover{background:#f7f9fd}
+  .note-item.sel{background:var(--blue-soft);border-color:#d8e5ff}
+  .note-item .t{font-weight:600;font-size:12.5px;display:flex;align-items:center;gap:6px}
+  .note-item .s{font-size:11.5px;color:var(--text-2);margin-top:4px;line-height:1.55;
+    display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+  .note-item .m{display:flex;gap:5px;margin-top:7px;align-items:center;flex-wrap:wrap}
+  .note-item .m time{margin-left:auto;font-size:10.5px;color:var(--text-3)}
+
+  .preview{padding:26px 34px;flex:1;overflow-y:auto;line-height:1.75}
+  .preview .fm{
+    background:#f8fafd;border:1px solid var(--line);border-radius:8px;
+    padding:12px 16px;font-size:11.5px;margin-bottom:20px;
+  }
+  .preview .fm table{border-collapse:collapse}
+  .preview .fm td{padding:2.5px 10px 2.5px 0;color:var(--text-2)}
+  .preview .fm td:first-child{color:var(--text-3);white-space:nowrap}
+  .preview h1{font-size:19px;margin-bottom:10px}
+  .preview h2{font-size:14.5px;margin:20px 0 8px;padding-bottom:5px;border-bottom:1px solid var(--line)}
+  .preview p{margin:8px 0;color:#333a49}
+  .preview .quote{border-left:3px solid var(--blue-2);background:var(--blue-soft);
+    padding:8px 14px;border-radius:0 8px 8px 0;color:var(--text-2);font-size:12.5px;margin:10px 0}
+  .preview .imgbox{border:1px solid var(--line);border-radius:8px;padding:18px;text-align:center;
+    color:var(--text-3);font-size:11.5px;background:#fafbfe;margin:12px 0}
+  .src-line{display:flex;gap:8px;align-items:center;font-size:11px;color:var(--text-3);
+    border-top:1px dashed var(--line);margin-top:22px;padding-top:12px}
+
+  /* ========== 搜索 ========== */
+  .search-panel{padding:18px}
+  .search-line{display:flex;gap:10px}
+  .search-input{
+    flex:1;display:flex;align-items:center;gap:9px;
+    border:1px solid var(--line-strong);border-radius:9px;padding:10px 14px;background:#fff;
+  }
+  .search-input input{border:none;outline:none;width:100%;font-size:13px;color:var(--text)}
+  .seg{display:flex;border:1px solid var(--line-strong);border-radius:9px;overflow:hidden}
+  .seg button{
+    border:none;background:#fff;padding:0 16px;font-size:12px;cursor:pointer;color:var(--text-2);
+  }
+  .seg button.on{background:var(--blue);color:#fff;font-weight:600}
+  .seg button+button{border-left:1px solid var(--line-strong)}
+  .hit{padding:15px 18px;margin-bottom:12px;transition:all .15s ease}
+  .hit:hover{transform:translateY(-1px);box-shadow:var(--shadow-hover)}
+  .hit .h{display:flex;align-items:center;gap:8px}
+  .hit .h .t{font-weight:600;font-size:13px}
+  .hit .h .score{margin-left:auto;display:flex;align-items:center;gap:8px;font-size:11px;color:var(--text-3)}
+  .hit .h .score .progress{width:70px}
+  .hit .c{font-size:12.5px;color:var(--text-2);margin-top:8px;line-height:1.7}
+  .hit .c mark{background:#fff0c2;color:#8a5a00;padding:0 2px;border-radius:3px}
+  .hit .f{display:flex;gap:10px;margin-top:9px;font-size:11px;color:var(--text-3);align-items:center}
+
+  /* ========== 管理 ========== */
+  .three-col{grid-template-columns:repeat(3,1fr)}
+  .level-row{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid #f0f2f7;font-size:12px}
+  .level-row:last-child{border:none}
+  .level-row .bar{flex:1}
+  .level-row .num{width:34px;text-align:right;font-weight:600}
+  .tag-cloud{display:flex;flex-wrap:wrap;gap:8px}
+  .tag-cloud .badge{cursor:pointer;padding:4px 10px}
+  .switch{
+    width:34px;height:19px;border-radius:20px;background:#dbe1ec;position:relative;cursor:pointer;transition:background .15s;
+    flex:none;margin-left:auto;
+  }
+  .switch::after{
+    content:"";position:absolute;top:2px;left:2px;width:15px;height:15px;border-radius:50%;background:#fff;
+    transition:left .15s;box-shadow:0 1px 2px rgba(0,0,0,.15);
+  }
+  .switch.on{background:var(--blue)}
+  .switch.on::after{left:17px}
+  .sched{display:flex;align-items:center;gap:10px;padding:11px 0;border-bottom:1px solid #f0f2f7;font-size:12px}
+  .sched:last-child{border:none}
+  .sched .info{flex:1}
+  .sched .info .n{font-weight:600}
+  .sched .info .d{font-size:11px;color:var(--text-3);margin-top:2px}
+
+  /* ========== 服务 ========== */
+  .svc-row{display:flex;align-items:center;gap:12px;padding:13px 0;border-bottom:1px solid #f0f2f7;font-size:12px}
+  .svc-row:last-child{border:none}
+  .mono{font-family:Consolas,monospace;font-size:11.5px;background:#f2f5fa;border:1px solid var(--line);
+    padding:3px 8px;border-radius:6px;color:var(--text-2)}
+  .model-row{display:flex;align-items:center;gap:12px;padding:11px 0;border-bottom:1px solid #f0f2f7;font-size:12px}
+  .model-row:last-child{border:none}
+
+  ::-webkit-scrollbar{width:9px;height:9px}
+  ::-webkit-scrollbar-thumb{background:#d3dae6;border-radius:6px;border:2px solid transparent;background-clip:content-box}
+  ::-webkit-scrollbar-thumb:hover{background:#b9c3d4;border:2px solid transparent;background-clip:content-box}
+  ::-webkit-scrollbar-track{background:transparent}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- ================= 左侧导航 ================= -->
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="brand-mark">
+        <svg viewBox="0 0 24 24"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v15H6.5A2.5 2.5 0 0 0 4 20.5z"/><path d="M4 20.5V5.5"/><path d="M9 7.5h7M9 11h7"/></svg>
+      </div>
+      <div>
+        <div class="brand-name">知识库管理工具</div>
+        <div class="brand-sub">KNOWLEDGE BASE STUDIO</div>
+      </div>
+    </div>
+    <nav class="nav">
+      <div class="nav-label">工作台</div>
+      <div class="nav-item active" data-view="overview">
+        <svg class="icon" viewBox="0 0 24 24"><rect x="3" y="3" width="8" height="8" rx="1.5"/><rect x="13" y="3" width="8" height="5" rx="1.5"/><rect x="13" y="10" width="8" height="11" rx="1.5"/><rect x="3" y="13" width="8" height="8" rx="1.5"/></svg>
+        概览
+      </div>
+      <div class="nav-item" data-view="import">
+        <svg class="icon" viewBox="0 0 24 24"><path d="M12 3v12"/><path d="M7 10l5 5 5-5"/><path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/></svg>
+        文档导入
+      </div>
+      <div class="nav-item" data-view="browse">
+        <svg class="icon" viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
+        知识浏览
+      </div>
+      <div class="nav-item" data-view="search">
+        <svg class="icon" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+        检索测试
+      </div>
+      <div class="nav-label">治理</div>
+      <div class="nav-item" data-view="manage">
+        <svg class="icon" viewBox="0 0 24 24"><path d="M12 3l7 3v5c0 4.5-3 8-7 10-4-2-7-5.5-7-10V6z"/><path d="M9 12l2 2 4-4"/></svg>
+        分级与维护
+      </div>
+      <div class="nav-item" data-view="export">
+        <svg class="icon" viewBox="0 0 24 24"><path d="M12 15V3"/><path d="M7 8l5-5 5 5"/><path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/></svg>
+        导出
+      </div>
+      <div class="nav-label">系统</div>
+      <div class="nav-item" data-view="service">
+        <svg class="icon" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="6" rx="1.5"/><rect x="3" y="14" width="18" height="6" rx="1.5"/><path d="M7 7h.01M7 17h.01"/></svg>
+        服务与模型
+      </div>
+    </nav>
+    <div class="sidebar-foot">
+      <div>运行模式：<span class="ok">完全离线</span></div>
+      <div>版本 v0.1 · 数据留存本机</div>
+    </div>
+  </aside>
+
+  <!-- ================= 主区 ================= -->
+  <div class="main">
+    <header class="topbar">
+      <div>
+        <div class="page-title" id="pageTitle">概览</div>
+      </div>
+      <div class="topbar-search">
+        <svg class="icon" viewBox="0 0 24 24" style="width:14px;height:14px"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+        <input placeholder="全局搜索笔记、标签、来源文档…">
+      </div>
+      <div class="status-chip"><span class="pulse"></span>MCP 服务运行中 · 127.0.0.1:8765</div>
+    </header>
+
+    <div class="content">
+
+      <!-- ========== 视图：概览 ========== -->
+      <section class="view active" id="view-overview">
+        <div class="grid stat-row">
+          <div class="card stat"><span class="k"><svg class="icon" viewBox="0 0 24 24" style="color:var(--blue)"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>知识库</span><span class="v">3</span><span class="t">产品知识库 / 制度库 / 研发库</span></div>
+          <div class="card stat"><span class="k"><svg class="icon" viewBox="0 0 24 24" style="color:var(--blue)"><path d="M6 2h9l5 5v15a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V3a1 1 0 0 1 1-1z"/><path d="M14 2v6h6"/></svg>知识笔记</span><span class="v">486</span><span class="t"><span class="up">+24</span> 本周新增</span></div>
+          <div class="card stat"><span class="k"><svg class="icon" viewBox="0 0 24 24" style="color:var(--green)"><path d="M12 3l7 3v5c0 4.5-3 8-7 10-4-2-7-5.5-7-10V6z"/><path d="M9 12l2 2 4-4"/></svg>已确认</span><span class="v">431</span><span class="t">88.7% · 草稿 52 · 归档 3</span></div>
+          <div class="card stat"><span class="k"><svg class="icon" viewBox="0 0 24 24" style="color:var(--blue)"><ellipse cx="12" cy="6" rx="8" ry="3"/><path d="M4 6v12c0 1.7 3.6 3 8 3s8-1.3 8-3V6"/><path d="M4 12c0 1.7 3.6 3 8 3s8-1.3 8-3"/></svg>索引覆盖</span><span class="v">99.2%</span><span class="t">向量 12,840 块 · 全文同步</span></div>
+        </div>
+
+        <div class="grid two-col">
+          <div class="card">
+            <div class="card-head"><h3>最近导入</h3><span class="more">全部记录</span></div>
+            <div class="card-body" style="padding-top:6px;padding-bottom:8px">
+              <div class="doc-item">
+                <div class="doc-icon" style="background:#eef4ff;color:#2563eb"><svg class="icon" viewBox="0 0 24 24"><path d="M6 2h9l5 5v15a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V3a1 1 0 0 1 1-1z"/><path d="M14 2v6h6"/></svg></div>
+                <div class="doc-meta"><div class="doc-name">产品安装手册 v3.2.docx</div><div class="doc-sub">manual · 生成笔记 6 篇 · 主题 manual</div></div>
+                <span class="badge b-green">已确认入库</span>
+              </div>
+              <div class="doc-item">
+                <div class="doc-icon" style="background:#fdf3e3;color:#b7791f"><svg class="icon" viewBox="0 0 24 24"><path d="M6 2h9l5 5v15a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V3a1 1 0 0 1 1-1z"/><path d="M14 2v6h6"/></svg></div>
+                <div class="doc-meta"><div class="doc-name">2026 数据安全管理办法.pdf</div><div class="doc-sub">policy · 扫描版 OCR · 生成笔记 4 篇</div></div>
+                <span class="badge b-amber">待人工确认</span>
+              </div>
+              <div class="doc-item">
+                <div class="doc-icon" style="background:#e8f7f1;color:#0e9f6e"><svg class="icon" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 3v18"/></svg></div>
+                <div class="doc-meta"><div class="doc-name">接口错误码对照表.xlsx</div><div class="doc-sub">data · 3 个 Sheet · 生成笔记 2 篇</div></div>
+                <span class="badge b-green">已确认入库</span>
+              </div>
+              <div class="doc-item">
+                <div class="doc-icon" style="background:#eef4ff;color:#2563eb"><svg class="icon" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="14" rx="2"/><path d="M8 21h8M12 18v3"/></svg></div>
+                <div class="doc-meta"><div class="doc-name">三季度产品评审会.pptx</div><div class="doc-sub">minutes · 22 页 · 生成笔记 3 篇</div></div>
+                <span class="badge b-gray">解析中 62%</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-head"><h3>维护计划</h3><span class="more">配置</span></div>
+            <div class="card-body" style="padding-top:6px;padding-bottom:8px">
+              <div class="task-item"><svg class="icon" viewBox="0 0 24 24" style="color:var(--green)"><path d="M20 6L9 17l-5-5"/></svg>增量索引<span class="when">导入后自动 · 正常</span></div>
+              <div class="task-item"><svg class="icon" viewBox="0 0 24 24" style="color:var(--blue)"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>每周巡检（孤儿/失效链接）<span class="when">周一 09:00</span></div>
+              <div class="task-item"><svg class="icon" viewBox="0 0 24 24" style="color:var(--blue)"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>知识库备份<span class="when">周日 02:00</span></div>
+              <div class="task-item"><svg class="icon" viewBox="0 0 24 24" style="color:var(--amber)"><path d="M12 9v4M12 17h.01"/><path d="M10.3 3.8L1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.8a2 2 0 0 0-3.4 0z"/></svg>过期笔记复核<span class="when">17 篇超 180 天</span></div>
+              <div class="task-item"><svg class="icon" viewBox="0 0 24 24" style="color:var(--blue)"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>重复笔记合并建议<span class="when">每月 1 日</span></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ========== 视图：导入 ========== -->
+      <section class="view" id="view-import">
+        <div class="dropzone">
+          <div class="dz-icon"><svg class="icon" viewBox="0 0 24 24"><path d="M12 3v12"/><path d="M7 10l5 5 5-5"/><path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/></svg></div>
+          <p>拖入文档或文件夹，或点击选择</p>
+          <span>支持 docx / xlsx / pptx / pdf（含扫描件）/ png / jpg / html / txt / md / csv · 全部本地解析</span>
+        </div>
+
+        <div class="card" style="margin-top:16px">
+          <div class="card-head"><h3>解析流水线</h3><span class="muted" style="margin-left:auto;font-size:11px">三季度产品评审会.pptx</span></div>
+          <div class="card-body">
+            <div class="steps">
+              <div class="step done"><div class="ball"><svg class="icon" viewBox="0 0 24 24" style="width:11px;height:11px"><path d="M20 6L9 17l-5-5"/></svg></div><div class="lbl">格式识别</div></div>
+              <div class="step done"><div class="ball"><svg class="icon" viewBox="0 0 24 24" style="width:11px;height:11px"><path d="M20 6L9 17l-5-5"/></svg></div><div class="lbl">解析提取</div></div>
+              <div class="step done"><div class="ball"><svg class="icon" viewBox="0 0 24 24" style="width:11px;height:11px"><path d="M20 6L9 17l-5-5"/></svg></div><div class="lbl">清洗结构化</div></div>
+              <div class="step doing"><div class="ball">4</div><div class="lbl">知识单元划分</div></div>
+              <div class="step"><div class="ball">5</div><div class="lbl">入库登记</div></div>
+              <div class="step"><div class="ball">6</div><div class="lbl">分块索引</div></div>
+            </div>
+            <div class="progress"><i style="width:62%"></i></div>
+          </div>
+        </div>
+
+        <div class="card" style="margin-top:16px">
+          <div class="card-head"><h3>入库预览（待确认）</h3><span class="more">全选确认</span></div>
+          <div class="card-body" style="padding:6px 8px">
+            <table class="tbl">
+              <thead><tr><th style="width:34px"><input type="checkbox" checked></th><th>生成笔记</th><th style="width:110px">文档类型</th><th style="width:110px">主题归口</th><th style="width:120px">标签</th><th style="width:110px">密级</th><th style="width:130px">操作</th></tr></thead>
+              <tbody>
+                <tr>
+                  <td><input type="checkbox" checked></td>
+                  <td><span class="strong">评审结论与行动项</span><div class="muted" style="font-size:11px;margin-top:2px">来源页 14-22 · 含 2 张配图</div></td>
+                  <td><span class="badge b-blue">minutes</span></td><td>minutes</td>
+                  <td><span class="badge b-gray">review</span> <span class="badge b-gray">q3</span></td>
+                  <td><span class="badge b-amber">内部</span></td>
+                  <td><button class="btn btn-sm">编辑</button> <button class="btn btn-sm btn-primary">确认</button></td>
+                </tr>
+                <tr>
+                  <td><input type="checkbox" checked></td>
+                  <td><span class="strong">新版本发布计划</span><div class="muted" style="font-size:11px;margin-top:2px">来源页 5-13 · 表格 1 个</div></td>
+                  <td><span class="badge b-blue">minutes</span></td><td>minutes</td>
+                  <td><span class="badge b-gray">release</span></td>
+                  <td><span class="badge b-amber">内部</span></td>
+                  <td><button class="btn btn-sm">编辑</button> <button class="btn btn-sm btn-primary">确认</button></td>
+                </tr>
+                <tr>
+                  <td><input type="checkbox"></td>
+                  <td><span class="strong">性能指标达成情况</span><div class="muted" style="font-size:11px;margin-top:2px">来源页 2-4 · 图表转 Markdown 表格</div></td>
+                  <td><span class="badge b-blue">data</span></td><td>data</td>
+                  <td><span class="badge b-gray">metrics</span></td>
+                  <td><span class="badge b-green">公开</span></td>
+                  <td><button class="btn btn-sm">编辑</button> <button class="btn btn-sm btn-primary">确认</button></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ========== 视图：浏览 ========== -->
+      <section class="view" id="view-browse">
+        <div class="grid browse">
+          <div class="card">
+            <div class="card-head"><h3>主题</h3><span class="more">管理</span></div>
+            <div class="card-body">
+              <div class="tree-node sel"><svg class="icon" viewBox="0 0 24 24" style="width:14px;height:14px"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>manual<span class="cnt">86</span></div>
+              <div class="tree-node tree-child"><span style="width:14px"></span>安装部署<span class="cnt">21</span></div>
+              <div class="tree-node tree-child"><span style="width:14px"></span>使用指南<span class="cnt">48</span></div>
+              <div class="tree-node tree-child"><span style="width:14px"></span>故障排查<span class="cnt">17</span></div>
+              <div class="tree-node"><svg class="icon" viewBox="0 0 24 24" style="width:14px;height:14px"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>policy<span class="cnt">42</span></div>
+              <div class="tree-node"><svg class="icon" viewBox="0 0 24 24" style="width:14px;height:14px"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>api<span class="cnt">63</span></div>
+              <div class="tree-node"><svg class="icon" viewBox="0 0 24 24" style="width:14px;height:14px"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>faq<span class="cnt">58</span></div>
+              <div class="tree-node"><svg class="icon" viewBox="0 0 24 24" style="width:14px;height:14px"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>minutes<span class="cnt">35</span></div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-head"><h3>安装部署 · 21 篇</h3></div>
+            <div class="card-body">
+              <div class="note-item sel">
+                <div class="t">安装指南 <span class="badge b-green" style="font-size:10px">已确认</span></div>
+                <div class="s">软件的安装步骤与环境要求，含 Windows 部署全流程与依赖自检。</div>
+                <div class="m"><span class="badge b-blue">manual</span><span class="badge b-gray">setup</span><span class="badge b-amber">内部</span><time>10-12</time></div>
+              </div>
+              <div class="note-item">
+                <div class="t">运行环境要求 <span class="badge b-green" style="font-size:10px">已确认</span></div>
+                <div class="s">硬件配置、操作系统版本与必备运行时的核对清单。</div>
+                <div class="m"><span class="badge b-blue">manual</span><span class="badge b-gray">setup</span><span class="badge b-green">公开</span><time>10-11</time></div>
+              </div>
+              <div class="note-item">
+                <div class="t">静默部署参数 <span class="badge b-amber" style="font-size:10px">草稿</span></div>
+                <div class="s">批量部署场景的命令行参数与配置模板说明。</div>
+                <div class="m"><span class="badge b-blue">manual</span><span class="badge b-gray">deploy</span><span class="badge b-amber">内部</span><time>10-09</time></div>
+              </div>
+              <div class="note-item">
+                <div class="t">升级与回滚 <span class="badge b-green" style="font-size:10px">已确认</span></div>
+                <div class="s">版本升级路径、数据兼容性与回滚操作步骤。</div>
+                <div class="m"><span class="badge b-blue">manual</span><span class="badge b-gray">upgrade</span><span class="badge b-amber">内部</span><time>09-28</time></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-head">
+              <h3>预览</h3>
+              <span class="more"><button class="btn btn-sm">编辑</button>&nbsp;<button class="btn btn-sm">历史版本</button></span>
+            </div>
+            <div class="preview">
+              <div class="fm">
+                <table>
+                  <tr><td>id</td><td>20261012-install-guide</td><td>tags</td><td>manual, setup</td></tr>
+                  <tr><td>status</td><td>verified</td><td>level</td><td>internal</td></tr>
+                  <tr><td>updated</td><td>2026-10-12</td><td>related</td><td>20261011-env-requirements</td></tr>
+                </table>
+              </div>
+              <h1>安装指南</h1>
+              <div class="quote">Summary: 软件的安装步骤与环境要求，含 Windows 部署全流程与依赖自检。</div>
+              <h2>前提条件</h2>
+              <p>安装前请确认目标机器满足运行环境要求（见「运行环境要求」），并完成安装包完整性校验。本文步骤全部离线执行，无需访问外网。</p>
+              <h2>安装步骤</h2>
+              <p>1. 将项目文件夹整体拷贝至目标磁盘；2. 运行 scripts\start.bat 完成依赖自检；3. 首次启动按向导完成模型校验。</p>
+              <div class="imgbox">[ 配图 ] assets/20261012-install-guide/img_01.png · 安装向导界面</div>
+              <h2>相关</h2>
+              <p>运行环境要求 — 前置：安装前核对；升级与回滚 — 参见：后续维护操作。</p>
+              <div class="src-line">
+                <svg class="icon" viewBox="0 0 24 24" style="width:13px;height:13px"><path d="M6 2h9l5 5v15a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V3a1 1 0 0 1 1-1z"/><path d="M14 2v6h6"/></svg>
+                来源：sources/2026-10-12_产品安装手册v3.2.docx · 第 3-5 页 · 已分块 8 块并入索引
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ========== 视图：搜索 ========== -->
+      <section class="view" id="view-search">
+        <div class="card search-panel">
+          <div class="search-line">
+            <div class="search-input">
+              <svg class="icon" viewBox="0 0 24 24" style="color:var(--text-3)"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+              <input value="离线环境下如何完成安装部署">
+            </div>
+            <div class="seg">
+              <button class="on">混合</button><button>语义</button><button>关键词</button>
+            </div>
+            <button class="btn btn-primary">检索</button>
+          </div>
+          <div style="display:flex;gap:14px;margin-top:12px;font-size:11.5px;color:var(--text-3)">
+            <span>范围：全部知识库</span><span>密级 ≤ 内部</span><span>状态：已确认</span><span>重排：bge-reranker 开启</span>
+          </div>
+        </div>
+
+        <div style="margin-top:16px">
+          <div class="card hit">
+            <div class="h"><span class="t">安装指南</span><span class="badge b-blue">manual</span>
+              <span class="score">相关度<div class="progress"><i style="width:93%"></i></div>0.93</span></div>
+            <div class="c">……本文步骤全部<mark>离线</mark>执行，无需访问外网。将项目文件夹整体拷贝至目标磁盘，运行 start.bat 完成依赖自检，首次启动按向导完成模型校验即可完成<mark>安装部署</mark>……</div>
+            <div class="f"><span>块 3/8 · 第 4 页</span><span>·</span><span>来源：产品安装手册v3.2.docx</span><span>·</span><span>updated 2026-10-12</span></div>
+          </div>
+          <div class="card hit">
+            <div class="h"><span class="t">运行环境要求</span><span class="badge b-blue">manual</span>
+              <span class="score">相关度<div class="progress"><i style="width:87%"></i></div>0.87</span></div>
+            <div class="c">……全部运行时与依赖随项目目录分发，目标机器无需联网、无需安装系统级 Python 环境，硬件要求为 8GB 内存及以上……</div>
+            <div class="f"><span>块 1/5 · 第 2 页</span><span>·</span><span>来源：产品安装手册v3.2.docx</span><span>·</span><span>updated 2026-10-11</span></div>
+          </div>
+          <div class="card hit">
+            <div class="h"><span class="t">静默部署参数</span><span class="badge b-amber">草稿</span>
+              <span class="score">相关度<div class="progress"><i style="width:74%"></i></div>0.74</span></div>
+            <div class="c">……批量场景下可通过命令行参数指定安装路径与组件范围，配合配置模板实现<mark>无人值守部署</mark>……</div>
+            <div class="f"><span>块 2/4 · 第 6 页</span><span>·</span><span>来源：产品安装手册v3.2.docx</span><span>·</span><span>updated 2026-10-09</span></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ========== 视图：管理 ========== -->
+      <section class="view" id="view-manage">
+        <div class="grid three-col">
+          <div class="card">
+            <div class="card-head"><h3>密级分布</h3><span class="more">规则</span></div>
+            <div class="card-body">
+              <div class="level-row"><span class="badge b-green">公开</span><div class="bar"><div class="progress"><i style="width:34%;background:linear-gradient(90deg,#0e9f6e,#34d399)"></i></div></div><span class="num">128</span></div>
+              <div class="level-row"><span class="badge b-amber">内部</span><div class="bar"><div class="progress"><i style="width:68%"></i></div></div><span class="num">341</span></div>
+              <div class="level-row"><span class="badge b-red">机密</span><div class="bar"><div class="progress"><i style="width:8%;background:linear-gradient(90deg,#d64545,#f08080)"></i></div></div><span class="num">17</span></div>
+              <div style="font-size:11px;color:var(--text-3);margin-top:10px;line-height:1.6">机密笔记不参与对外检索，导出需二次确认；笔记密级可上调不可低于库默认。</div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-head"><h3>受控标签词表</h3><span class="more">新增标签</span></div>
+            <div class="card-body">
+              <div class="tag-cloud">
+                <span class="badge b-blue">setup</span><span class="badge b-blue">deploy</span><span class="badge b-blue">upgrade</span>
+                <span class="badge b-blue">security</span><span class="badge b-blue">api</span><span class="badge b-blue">error-code</span>
+                <span class="badge b-blue">review</span><span class="badge b-blue">release</span><span class="badge b-blue">metrics</span>
+                <span class="badge b-blue">onboarding</span><span class="badge b-blue">troubleshooting</span>
+              </div>
+              <div style="font-size:11px;color:var(--text-3);margin-top:12px;line-height:1.6">新增标签须登记入库 INDEX.md；巡检会标记词表外标签。</div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-head"><h3>文档类型</h3><span class="more">模板库</span></div>
+            <div class="card-body" style="font-size:12px;line-height:2.1">
+              <div><span class="badge b-blue">manual</span> 产品手册 · 86 篇</div>
+              <div><span class="badge b-blue">policy</span> 规章制度 · 42 篇</div>
+              <div><span class="badge b-blue">api</span> 接口文档 · 63 篇</div>
+              <div><span class="badge b-blue">minutes</span> 会议纪要 · 35 篇</div>
+              <div><span class="badge b-blue">faq</span> 常见问题 · 58 篇</div>
+              <div><span class="badge b-gray">data / design / media / misc</span> · 202 篇</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card" style="margin-top:16px">
+          <div class="card-head"><h3>定期维护任务</h3><span class="more">巡检报告</span></div>
+          <div class="card-body" style="padding-top:6px;padding-bottom:8px">
+            <div class="sched"><div class="info"><div class="n">增量索引</div><div class="d">新笔记确认入库后自动分块并向量化</div></div><span class="badge b-green">上次成功</span><div class="switch on"></div></div>
+            <div class="sched"><div class="info"><div class="n">每周巡检</div><div class="d">孤儿笔记 / 失效链接 / 标签越表 / frontmatter 完整性，仅出报告</div></div><span class="muted" style="font-size:11px">周一 09:00</span><div class="switch on"></div></div>
+            <div class="sched"><div class="info"><div class="n">重复笔记合并建议</div><div class="d">相似度检测，列出候选合并对，人工确认后执行</div></div><span class="muted" style="font-size:11px">每月 1 日</span><div class="switch on"></div></div>
+            <div class="sched"><div class="info"><div class="n">知识库备份</div><div class="d">打包快照至 exports\backup\，保留最近 4 份</div></div><span class="muted" style="font-size:11px">周日 02:00</span><div class="switch on"></div></div>
+            <div class="sched"><div class="info"><div class="n">过期笔记复核</div><div class="d">列出超过 180 天未更新的笔记，提示人工复核</div></div><span class="badge b-amber">17 篇待复核</span><div class="switch"></div></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ========== 视图：导出 ========== -->
+      <section class="view" id="view-export">
+        <div class="grid" style="grid-template-columns:repeat(2,1fr)">
+          <div class="card">
+            <div class="card-head"><h3>知识包（.kbpack）</h3></div>
+            <div class="card-body" style="font-size:12px;color:var(--text-2);line-height:1.8">
+              完整知识库目录 + 向量索引快照 + manifest 清单（版本、条目数、校验和）。可在另一台机器一键导入还原，免重建索引。
+              <div style="margin-top:14px"><button class="btn btn-primary">导出知识包</button></div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-head"><h3>纯 Markdown 包</h3></div>
+            <div class="card-body" style="font-size:12px;color:var(--text-2);line-height:1.8">
+              仅 topics + assets + INDEX.md + llms.txt，交给任何智能体直接读取使用，不含索引数据，体积最小。
+              <div style="margin-top:14px"><button class="btn">导出 Markdown 包</button></div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-head"><h3>训练集（JSONL）</h3></div>
+            <div class="card-body" style="font-size:12px;color:var(--text-2);line-height:1.8">
+              基于已确认笔记自动生成问答对（供微调），或导出块级数据（供外部向量库重建）。生成后进入人工筛选队列。
+              <div style="margin-top:14px"><button class="btn">生成训练集</button></div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-head"><h3>导出记录</h3><span class="more">打开目录</span></div>
+            <div class="card-body" style="padding-top:6px;padding-bottom:8px;font-size:12px">
+              <div class="task-item"><span class="strong">产品知识库_20261011.kbpack</span><span class="when">486 笔记 · 312 MB · 10-11 22:04</span></div>
+              <div class="task-item"><span class="strong">backup_20261006.zip</span><span class="when">自动备份 · 298 MB · 10-06 02:00</span></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ========== 视图：服务与模型 ========== -->
+      <section class="view" id="view-service">
+        <div class="grid" style="grid-template-columns:1.3fr 1fr">
+          <div class="card">
+            <div class="card-head"><h3>对外服务</h3></div>
+            <div class="card-body" style="padding-top:6px;padding-bottom:10px">
+              <div class="svc-row">
+                <div style="flex:1"><div class="strong">MCP Server</div><div class="muted" style="font-size:11px;margin-top:3px">工具：kb_list / kb_search / kb_read / kb_stats</div></div>
+                <span class="mono">127.0.0.1:8765</span><span class="badge b-green">运行中</span><div class="switch on"></div>
+              </div>
+              <div class="svc-row">
+                <div style="flex:1"><div class="strong">REST API</div><div class="muted" style="font-size:11px;margin-top:3px">/search · /notes/{id} · /import · /export</div></div>
+                <span class="mono">127.0.0.1:8766</span><span class="badge b-green">运行中</span><div class="switch on"></div>
+              </div>
+              <div class="svc-row">
+                <div style="flex:1"><div class="strong">在线大模型 API（可选增强）</div><div class="muted" style="font-size:11px;margin-top:3px">仅用于摘要/问答对生成；默认关闭，数据不出本机</div></div>
+                <span class="badge b-gray">已关闭</span><div class="switch"></div>
+              </div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-head"><h3>本地模型</h3><span class="more">models\</span></div>
+            <div class="card-body" style="padding-top:6px;padding-bottom:10px">
+              <div class="model-row"><div style="flex:1"><div class="strong">BGE-M3</div><div class="muted" style="font-size:11px">向量化 · 已加载</div></div><span class="badge b-green">正常</span></div>
+              <div class="model-row"><div style="flex:1"><div class="strong">bge-reranker-v2-m3</div><div class="muted" style="font-size:11px">检索重排 · 已加载</div></div><span class="badge b-green">正常</span></div>
+              <div class="model-row"><div style="flex:1"><div class="strong">PaddleOCR PP-OCRv4</div><div class="muted" style="font-size:11px">扫描件/图片文字识别</div></div><span class="badge b-green">正常</span></div>
+              <div class="model-row"><div style="flex:1"><div class="strong">MinerU 版面模型组</div><div class="muted" style="font-size:11px">PDF 高保真解析</div></div><span class="badge b-green">正常</span></div>
+              <div class="model-row"><div style="flex:1"><div class="strong">视觉理解模型（可选）</div><div class="muted" style="font-size:11px">图片内容描述 · 未启用</div></div><span class="badge b-gray">未安装</span></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</div>
+
+<script>
+  const titles = {
+    overview:'概览', import:'文档导入', browse:'知识浏览',
+    search:'检索测试', manage:'分级与维护', export:'导出', service:'服务与模型'
+  };
+  document.querySelectorAll('.nav-item').forEach(item=>{
+    item.addEventListener('click',()=>{
+      document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+      document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+      item.classList.add('active');
+      document.getElementById('view-'+item.dataset.view).classList.add('active');
+      document.getElementById('pageTitle').textContent = titles[item.dataset.view];
+    });
+  });
+  document.querySelectorAll('.switch').forEach(sw=>{
+    sw.addEventListener('click',()=>sw.classList.toggle('on'));
+  });
+  document.querySelectorAll('.seg button').forEach(btn=>{
+    btn.addEventListener('click',()=>{
+      btn.parentElement.querySelectorAll('button').forEach(b=>b.classList.remove('on'));
+      btn.classList.add('on');
+    });
+  });
+  document.querySelectorAll('.note-item').forEach(n=>{
+    n.addEventListener('click',()=>{
+      n.parentElement.querySelectorAll('.note-item').forEach(x=>x.classList.remove('sel'));
+      n.classList.add('sel');
+    });
+  });
+  document.querySelectorAll('.tree-node').forEach(n=>{
+    n.addEventListener('click',()=>{
+      document.querySelectorAll('.tree-node').forEach(x=>x.classList.remove('sel'));
+      n.classList.add('sel');
+    });
+  });
+</script>
+</body>
+</html>

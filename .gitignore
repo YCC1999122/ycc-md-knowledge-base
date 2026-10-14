@@ -1,0 +1,18 @@
+# embedded runtime & user data & models — stay out of version control
+runtime/
+libraries/
+models/
+config/
+exports/
+.screenshots/
+
+# build artifacts
+*.exe
+*.spec.bak
+workspace/build*/
+workspace/dist/
+workspace/build_diag*/
+workspace/*.err
+workspace/*.out
+__pycache__/
+*.pyc
